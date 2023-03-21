@@ -40,33 +40,58 @@ def Get_Product_Information(id):
     text=response.content
     data=json.loads(text)
 
-    master_=[]
-    master_.append(data['id'])
-    master_.append(data['name'])
-    master_.append(data['categories']['name'])
-    master_.append(data['brand']['name'])
-    master_.append(data['current_seller']['id'])
-    master_.append(data['current_seller']['name'])
+    master_={}
+    productID=data['id']
+    productName=data['name']
+    brand=data['brand']['name']
+    category=data['categories']['name']
+    shopID=data['current_seller']['id']
+    shopName=data['current_seller']['name']
+    master_={
+        'Product_ID':productID,
+        'Product_Name':productName,
+        'Brand':brand,
+        'Category':category,
+        'Shop_ID':shopID,
+        'Shop_Name':shopName
+    }
     masterProduct.append(master_)
     
     for i in range(0,len(data['configurable_products'])):
-        detail_=[]
-        detail_.append(data['id'])
-        detail_.append(int(data['configurable_products'][i]['sku']))
-        detail_.append(data['configurable_products'][i]['option1'])
-        detail_.append(data['configurable_products'][i]['price'])
+        detail_={}
+        productID=data['id']
+        SKU_ID=int(data['configurable_products'][i]['sku'])
+        SKU_Name=data['configurable_products'][i]['option1']
+        price=data['configurable_products'][i]['price']
+        isActive_=data['configurable_products'][i]['inventory_status']
+        if isActive_=="available":
+            isActive=1
+        else:
+            isActive=0
+        detail_={
+            'Product_ID':productID,
+            'SKU_ID':SKU_ID,
+            'SKU_Name':SKU_Name,
+            'Price':price,
+            'Is_Active':isActive
+        }
         productDetail.append(detail_)
 
     try: 
-        sold_item=data['all_time_quantity_sold']
+        soldItems=data['all_time_quantity_sold']
     except Exception as e:
-        sold_item=''
+        soldItems=''
         
-    marketing_=[]
-    marketing_.append(data['id'])
-    marketing_.append(data['review_count'])
-    marketing_.append(data['rating_average'])
-    marketing_.append(sold_item)
+    marketing_={}
+    productID=data['id']
+    countReviews=data['review_count']
+    averageScore=data['rating_average']
+    marketing_={
+        'Product_ID':productID,
+        'Count_Reviews':countReviews,
+        'Average_Score':averageScore,
+        'Sold_Items':soldItems
+    }
     Marketing.append(marketing_)
 
 def Get_Multi_Product():
@@ -78,9 +103,9 @@ def Create_DataFrame():
         if productDetail is not None and Marketing is not None:
             print('------Data is available-------')
             
-    df_MasterProduct=pd.DataFrame(data=masterProduct,columns=['ID','Name','Category','Brand','Shop ID','Shop name'])
-    df_ProductDetail=pd.DataFrame(data=productDetail,columns=['Product ID','SKU','Option','Price'])
-    df_Marketing=pd.DataFrame(data=Marketing,columns=['Product ID','Count review','Average score','Sold items'])
+    df_MasterProduct=pd.DataFrame(data=masterProduct)
+    df_ProductDetail=pd.DataFrame(data=productDetail)
+    df_Marketing=pd.DataFrame(data=Marketing)
     
     
     # Dataframe to Excel 
